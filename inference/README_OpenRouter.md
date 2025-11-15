@@ -55,14 +55,14 @@ bash run_react_infer.sh
 bash run_react_infer.sh --openrouter_model "openai/gpt-4o"
 ```
 
-注意：系统会自动为 Tongyi DeepResearch 选择合适的 tokenizer。如果使用其他模型，可能需要手动扩展 tokenizer 映射。
+注意：系统会自动尝试下载相应模型的 tokenizer。对于已知模型使用优化映射，未知模型直接使用模型名。
 
 ## 技术细节
 
 - **模型名称**: 可通过 `--openrouter_model` 参数配置，默认为 `alibaba/tongyi-deepresearch-30b-a3b`
 - **API 端点**: `https://openrouter.ai/api/v1`
 - **推理参数**: 与本地模型相同（温度、top_p、presence_penalty 等）
-- **Tokenizer**: 自动选择对应的 tokenizer（当前支持 Tongyi DeepResearch 使用 Qwen tokenizer）
+- **Tokenizer**: 自动选择对应的 tokenizer（已知模型使用特定映射，未知模型使用模型名本身作为 tokenizer）
 - **网络配置**: 支持 SOCKS5 代理和 HuggingFace 镜像站
 
 ## 故障排除

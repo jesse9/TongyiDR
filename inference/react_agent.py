@@ -137,11 +137,13 @@ class MultiTurnReactAgent(FnCallAgent):
 
     def _get_tokenizer_model_name(self):
         """Get the appropriate tokenizer model name based on the OpenRouter model."""
+        # For known models, use specific tokenizer mappings
+        # For unknown models, use the model name itself as tokenizer
         model_mapping = {
-            "alibaba/tongyi-deepresearch-30b-a3b": "Qwen/Qwen2.5-72B-Instruct",
+            "alibaba/tongyi-deepresearch-30b-a3b": "Alibaba-NLP/Tongyi-DeepResearch-30B-A3B",
             # Add more mappings as needed for other models
         }
-        return model_mapping.get(self.openrouter_model, "Qwen/Qwen2.5-72B-Instruct")  # Default fallback
+        return model_mapping.get(self.openrouter_model, self.openrouter_model)  # Use model name as fallback
 
     def count_tokens(self, messages):
         # For OpenRouter, use the corresponding model name for tokenizer
