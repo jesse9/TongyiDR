@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     if model == "openrouter":
         model_name = "openrouter"
-        model_dir = os.path.join(output_base, "openrouter_sglang")
+        model_dir = os.path.join(output_base, "openrouter_output")
     else:
         model_name = os.path.basename(model.rstrip('/'))
         model_dir = os.path.join(output_base, f"{model_name}_sglang")
