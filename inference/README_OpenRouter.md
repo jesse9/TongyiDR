@@ -65,6 +65,20 @@ bash run_react_infer.sh --openrouter_model "openai/gpt-4o"
 
 注意：系统会自动尝试下载相应模型的 tokenizer。对于已知模型使用优化映射，未知模型直接使用模型名。
 
+### 单问题执行
+
+如果只需要对单个问题进行推理，可以使用 `run_agent.py` 脚本：
+
+```bash
+python run_agent.py "What is the capital of France?" --output /tmp/output
+```
+
+或使用文件上传格式：
+
+```bash
+python run_agent.py "(Uploaded 1 file: ['hello.txt'])\n\nHello!" --output /tmp/output
+```
+
 ## 技术细节
 
 - **模型名称**: 可通过 `--openrouter_model` 参数配置，默认为 `alibaba/tongyi-deepresearch-30b-a3b`

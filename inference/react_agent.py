@@ -48,11 +48,13 @@ class MultiTurnReactAgent(FnCallAgent):
     def __init__(self,
                  function_list: Optional[List[Union[str, Dict, BaseTool]]] = None,
                  llm: Optional[Union[Dict, BaseChatModel]] = None,
+                 file_root_path: str = "./eval_data/file_corpus",
                  **kwargs):
 
         self.llm_generate_cfg = llm["generate_cfg"]
         self.llm_local_path = llm["model"]
         self.openrouter_model = llm.get("openrouter_model", "alibaba/tongyi-deepresearch-30b-a3b")
+        self.file_root_path = file_root_path
 
     def sanity_check_output(self, content):
         return "<think>" in content and "</think>" in content
@@ -281,7 +283,7 @@ class MultiTurnReactAgent(FnCallAgent):
             elif tool_name == "parse_file":
                 params = {"files": tool_args["files"]}
                 
-                raw_result = asyncio.run(TOOL_MAP[tool_name].call(params, file_root_path="./eval_data/file_corpus"))
+                raw_result = asyncio.run(TOOL_MAP[tool_name].call(params, file_root_path=self.file_root_path))
                 result = raw_result
 
                 if not isinstance(raw_result, str):
