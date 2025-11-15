@@ -57,22 +57,46 @@ class MultiTurnReactAgent(FnCallAgent):
         return "<think>" in content and "</think>" in content
     
     def call_server(self, msgs, planning_port, max_tries=10):
-        
-        openai_api_key = "EMPTY"
-        openai_api_base = f"http://127.0.0.1:{planning_port}/v1"
 
-        client = OpenAI(
-            api_key=openai_api_key,
-            base_url=openai_api_base,
-            timeout=600.0,
-        )
+        # Check for OpenRouter API key
+        openrouter_api_key = os.getenv('OPENROUTER_API_KEY')
+        if openrouter_api_key:
+            # Use OpenRouter API
+            openai_api_key = openrouter_api_key
+            openai_api_base = "https://openrouter.ai/api/v1"
+            model_name = "alibaba/tongyi-deepresearch-30b-a3b"
+
+            # Configure proxy if SOCKS5_PROXY is set
+            client_kwargs = {
+                'api_key': openai_api_key,
+                'base_url': openai_api_base,
+                'timeout': 600.0,
+            }
+
+            socks5_proxy = os.getenv('SOCKS5_PROXY')
+            if socks5_proxy:
+                import httpx
+                client_kwargs['http_client'] = httpx.Client(proxies=f"socks5://{socks5_proxy}")
+
+            client = OpenAI(**client_kwargs)
+        else:
+            # Use local VLLM server (original behavior)
+            openai_api_key = "EMPTY"
+            openai_api_base = f"http://127.0.0.1:{planning_port}/v1"
+            model_name = self.model
+
+            client = OpenAI(
+                api_key=openai_api_key,
+                base_url=openai_api_base,
+                timeout=600.0,
+            )
 
         base_sleep_time = 1 
         for attempt in range(max_tries):
             try:
                 print(f"--- Attempting to call the service, try {attempt + 1}/{max_tries} ---")
                 chat_response = client.chat.completions.create(
-                    model=self.model,
+                    model=model_name,
                     messages=msgs,
                     stop=["\n<tool_response>", "<tool_response>"],
                     temperature=self.llm_generate_cfg.get('temperature', 0.6),
@@ -83,9 +107,10 @@ class MultiTurnReactAgent(FnCallAgent):
                 )
                 content = chat_response.choices[0].message.content
 
-                # OpenRouter provides API calling. If you want to use OpenRouter, you need to uncomment line 89 - 90.
-                # reasoning_content = "<think>\n" + chat_response.choices[0].message.reasoning.strip() + "\n</think>"
-                # content = reasoning_content + content                
+                # OpenRouter provides reasoning content. If using OpenRouter, concatenate reasoning with content.
+                if openrouter_api_key and hasattr(chat_response.choices[0].message, 'reasoning') and chat_response.choices[0].message.reasoning:
+                    reasoning_content = "<think>\n" + chat_response.choices[0].message.reasoning.strip() + "\n</think>"
+                    content = reasoning_content + "\n" + content                
                 
                 if content and content.strip():
                     print("--- Service call successful, received a valid response ---")

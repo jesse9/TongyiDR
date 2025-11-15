@@ -35,9 +35,12 @@ if __name__ == "__main__":
         print(f"Error: worker_split ({worker_split}) must be between 1 and total_splits ({total_splits})")
         exit(1)
 
-    model_name = os.path.basename(model.rstrip('/'))
-
-    model_dir = os.path.join(output_base, f"{model_name}_sglang")
+    if model == "openrouter":
+        model_name = "openrouter"
+        model_dir = os.path.join(output_base, "openrouter_sglang")
+    else:
+        model_name = os.path.basename(model.rstrip('/'))
+        model_dir = os.path.join(output_base, f"{model_name}_sglang")
     dataset_dir = os.path.join(model_dir, args.dataset)
 
     os.makedirs(dataset_dir, exist_ok=True)
@@ -48,7 +51,21 @@ if __name__ == "__main__":
     print(f"Number of rollouts: {roll_out_count}")
     print(f"Data splitting: {worker_split}/{total_splits}")
 
-    data_filepath = f"{args.dataset}"
+    data_filepath = args.dataset
+
+    # Handle path resolution: if file doesn't exist at given path,
+    # try relative to project root or inference directory
+    if not os.path.exists(data_filepath):
+        # Try relative to project root (go up one level from inference/)
+        project_root_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), data_filepath)
+        if os.path.exists(project_root_path):
+            data_filepath = project_root_path
+        else:
+            # Try relative to inference directory
+            inference_path = os.path.join(os.path.dirname(__file__), data_filepath)
+            if os.path.exists(inference_path):
+                data_filepath = inference_path
+
     try:
         if data_filepath.endswith(".json"):
             with open(data_filepath, "r", encoding="utf-8") as f:
@@ -152,17 +169,30 @@ if __name__ == "__main__":
     if not tasks_to_run_all:
         print("All rollouts have been completed and no execution is required.")
     else:
-        llm_cfg = {
-            'model': model,
-            'generate_cfg': {
-                'max_input_tokens': 320000,
-                'max_retries': 10,
-                'temperature': args.temperature,
-                'top_p': args.top_p,
-                'presence_penalty': args.presence_penalty
-            },
-            'model_type': 'qwen_dashscope'
-        }
+        if model == "openrouter":
+            llm_cfg = {
+                'model': "openrouter",  # Placeholder, actual model name handled in react_agent.py
+                'generate_cfg': {
+                    'max_input_tokens': 320000,
+                    'max_retries': 10,
+                    'temperature': args.temperature,
+                    'top_p': args.top_p,
+                    'presence_penalty': args.presence_penalty
+                },
+                'model_type': 'openrouter'
+            }
+        else:
+            llm_cfg = {
+                'model': model,
+                'generate_cfg': {
+                    'max_input_tokens': 320000,
+                    'max_retries': 10,
+                    'temperature': args.temperature,
+                    'top_p': args.top_p,
+                    'presence_penalty': args.presence_penalty
+                },
+                'model_type': 'qwen_dashscope'
+            }
 
         test_agent = MultiTurnReactAgent(
             llm=llm_cfg,
