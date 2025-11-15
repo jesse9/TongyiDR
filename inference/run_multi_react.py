@@ -15,7 +15,7 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, default="")
     parser.add_argument("--output", type=str, default="")
     parser.add_argument("--dataset", type=str, default="gaia")
-    parser.add_argument("--file_root", type=str, default="./eval_data/file_corpus/")
+    parser.add_argument("--fileroot", type=str, default="./eval_data/file_corpus/")
     parser.add_argument("--temperature", type=float, default=0.6)
     parser.add_argument("--top_p", type=float, default=0.95)
     parser.add_argument("--presence_penalty", type=float, default=1.1)
@@ -203,7 +203,7 @@ if __name__ == "__main__":
         test_agent = MultiTurnReactAgent(
             llm=llm_cfg,
             function_list=["search", "visit", "google_scholar", "PythonInterpreter"],
-            file_root_path=args.file_root
+            file_root_path=args.fileroot
         )
 
         write_locks = {i: threading.Lock() for i in range(1, roll_out_count + 1)}
