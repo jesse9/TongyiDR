@@ -22,6 +22,7 @@ if __name__ == "__main__":
     parser.add_argument("--roll_out_count", type=int, default=3)
     parser.add_argument("--total_splits", type=int, default=1)
     parser.add_argument("--worker_split", type=int, default=1)
+    parser.add_argument("--openrouter_model", type=str, default="alibaba/tongyi-deepresearch-30b-a3b")
     args = parser.parse_args()
 
     model = args.model
@@ -29,6 +30,9 @@ if __name__ == "__main__":
     roll_out_count = args.roll_out_count
     total_splits = args.total_splits
     worker_split = args.worker_split
+
+    # Get OpenRouter model name from command line argument
+    openrouter_model = args.openrouter_model
 
     # Validate worker_split
     if worker_split < 1 or worker_split > total_splits:
@@ -172,6 +176,7 @@ if __name__ == "__main__":
         if model == "openrouter":
             llm_cfg = {
                 'model': "openrouter",  # Placeholder, actual model name handled in react_agent.py
+                'openrouter_model': openrouter_model,
                 'generate_cfg': {
                     'max_input_tokens': 320000,
                     'max_retries': 10,

@@ -21,6 +21,9 @@ OPENROUTER_API_KEY=your_openrouter_api_key_here
 
 # 可选：如果需要通过 SOCKS5 代理访问 API
 # SOCKS5_PROXY=socks5://127.0.0.1:1080
+
+# 可选：如果需要从 HuggingFace 镜像站下载 tokenizer
+# HF_ENDPOINT=https://hf-mirror.com
 ```
 
 ### 3. 安装依赖
@@ -44,17 +47,30 @@ bash run_react_infer.sh
 
 脚本会自动检测到 `OPENROUTER_API_KEY` 环境变量的存在，并跳过本地服务器启动步骤，直接通过 OpenRouter API 进行推理。
 
+### 使用不同模型
+
+如果要使用 OpenRouter 上其他的模型，可以使用 `--openrouter_model` 参数：
+
+```bash
+bash run_react_infer.sh --openrouter_model "openai/gpt-4o"
+```
+
+注意：系统会自动为 Tongyi DeepResearch 选择合适的 tokenizer。如果使用其他模型，可能需要手动扩展 tokenizer 映射。
+
 ## 技术细节
 
-- **模型名称**: `alibaba/tongyi-deepresearch-30b-a3b`
+- **模型名称**: 可通过 `--openrouter_model` 参数配置，默认为 `alibaba/tongyi-deepresearch-30b-a3b`
 - **API 端点**: `https://openrouter.ai/api/v1`
 - **推理参数**: 与本地模型相同（温度、top_p、presence_penalty 等）
+- **Tokenizer**: 自动选择对应的 tokenizer（当前支持 Tongyi DeepResearch 使用 Qwen tokenizer）
+- **网络配置**: 支持 SOCKS5 代理和 HuggingFace 镜像站
 
 ## 故障排除
 
 1. **API Key 无效**: 确保你的 OpenRouter API Key 正确且有效
-2. **网络问题**: 如果在中国大陆使用，可能需要配置 SOCKS5 代理
-3. **配额不足**: 检查你的 OpenRouter 账户是否有足够的 credits
+2. **网络问题**: 如果在中国大陆使用，可能需要配置 SOCKS5 代理或 HF_ENDPOINT
+3. **Tokenizer 下载失败**: 如果无法连接 HuggingFace，请设置 `HF_ENDPOINT` 使用镜像站
+4. **配额不足**: 检查你的 OpenRouter 账户是否有足够的 credits
 
 ## 回退到本地模型
 

@@ -52,6 +52,7 @@ class MultiTurnReactAgent(FnCallAgent):
 
         self.llm_generate_cfg = llm["generate_cfg"]
         self.llm_local_path = llm["model"]
+        self.openrouter_model = llm.get("openrouter_model", "alibaba/tongyi-deepresearch-30b-a3b")
 
     def sanity_check_output(self, content):
         return "<think>" in content and "</think>" in content
@@ -64,7 +65,7 @@ class MultiTurnReactAgent(FnCallAgent):
             # Use OpenRouter API
             openai_api_key = openrouter_api_key
             openai_api_base = "https://openrouter.ai/api/v1"
-            model_name = "alibaba/tongyi-deepresearch-30b-a3b"
+            model_name = self.openrouter_model
 
             # Configure proxy if SOCKS5_PROXY is set
             client_kwargs = {
@@ -134,12 +135,32 @@ class MultiTurnReactAgent(FnCallAgent):
         
         return f"vllm server error!!!"
 
+    def _get_tokenizer_model_name(self):
+        """Get the appropriate tokenizer model name based on the OpenRouter model."""
+        model_mapping = {
+            "alibaba/tongyi-deepresearch-30b-a3b": "Qwen/Qwen2.5-72B-Instruct",
+            # Add more mappings as needed for other models
+        }
+        return model_mapping.get(self.openrouter_model, "Qwen/Qwen2.5-72B-Instruct")  # Default fallback
+
     def count_tokens(self, messages):
-        tokenizer = AutoTokenizer.from_pretrained(self.llm_local_path) 
+        # For OpenRouter, use the corresponding model name for tokenizer
+        if os.getenv('OPENROUTER_API_KEY'):
+            model_name_for_tokenizer = self._get_tokenizer_model_name()
+        else:
+            model_name_for_tokenizer = self.llm_local_path
+
+        # Use HF_ENDPOINT if set for downloading from alternative sources
+        tokenizer_kwargs = {}
+        if os.getenv('HF_ENDPOINT'):
+            # Set environment variable for transformers to use custom endpoint
+            os.environ['HF_HUB_ENDPOINT'] = os.getenv('HF_ENDPOINT')
+
+        tokenizer = AutoTokenizer.from_pretrained(model_name_for_tokenizer, **tokenizer_kwargs)
         full_prompt = tokenizer.apply_chat_template(messages, tokenize=False)
         tokens = tokenizer(full_prompt, return_tensors="pt")
         token_count = len(tokens["input_ids"][0])
-        
+
         return token_count
 
     def _run(self, data: str, model: str, **kwargs) -> List[List[Message]]:
