@@ -76,8 +76,10 @@ python run_agent.py "What is the capital of France?" --output /tmp/output
 或使用文件上传格式：
 
 ```bash
-python run_agent.py "(Uploaded 1 file: ['hello.txt'])\n\nHello!" --output /tmp/output
+python run_agent.py "(Uploaded 1 file: ['hello.txt'])\n\nHello!" --output /tmp/output --file_root /path/to/file/root
 ```
+
+`--file_root` 参数用于指定文件解析的根目录，默认为 `./inference/eval_data/file_corpus/`。
 
 ## 技术细节
 

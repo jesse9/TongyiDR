@@ -15,6 +15,7 @@ if __name__ == "__main__":
     parser.add_argument("question", help="The question to answer")
     parser.add_argument("--model", type=str, default="")
     parser.add_argument("--output", type=str, default="./output")
+    parser.add_argument("--file_root", type=str, default="./inference/eval_data/file_corpus/")
     parser.add_argument("--temperature", type=float, default=0.6)
     parser.add_argument("--top_p", type=float, default=0.95)
     parser.add_argument("--presence_penalty", type=float, default=1.1)
@@ -97,7 +98,7 @@ if __name__ == "__main__":
         test_agent = MultiTurnReactAgent(
             llm=llm_cfg,
             function_list=["search", "visit", "google_scholar", "PythonInterpreter"],
-            file_root_path="./inference/eval_data/file_corpus/"
+            file_root_path=args.file_root
         )
 
         write_locks = {1: threading.Lock()}
