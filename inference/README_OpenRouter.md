@@ -47,9 +47,17 @@ bash run_react_infer.sh
 
 脚本会自动检测到 `OPENROUTER_API_KEY` 环境变量的存在，并跳过本地服务器启动步骤，直接通过 OpenRouter API 进行推理。
 
+### 使用方法
+
+运行脚本时不需要指定额外的参数，系统会自动检测环境变量并使用 OpenRouter：
+
+```bash
+bash run_react_infer.sh
+```
+
 ### 使用不同模型
 
-如果要使用 OpenRouter 上其他的模型，可以使用 `--openrouter_model` 参数：
+如果要使用 OpenRouter 上其他的模型，可以通过命令行参数指定：
 
 ```bash
 bash run_react_infer.sh --openrouter_model "openai/gpt-4o"

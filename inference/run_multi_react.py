@@ -39,7 +39,7 @@ if __name__ == "__main__":
         print(f"Error: worker_split ({worker_split}) must be between 1 and total_splits ({total_splits})")
         exit(1)
 
-    if model == "openrouter":
+    if not model and openrouter_model:
         model_name = "openrouter"
         model_dir = os.path.join(output_base, "openrouter_output")
     else:
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     if not tasks_to_run_all:
         print("All rollouts have been completed and no execution is required.")
     else:
-        if model == "openrouter":
+        if not model and openrouter_model:
             llm_cfg = {
                 'model': "openrouter",  # Placeholder, actual model name handled in react_agent.py
                 'openrouter_model': openrouter_model,
